@@ -13,8 +13,9 @@ import { Concert_date } from 'src/domain/concert_dates.entity';
     TypeOrmModule.forFeature([Reservation]),
     TypeOrmModule.forFeature([Concert]),
     TypeOrmModule.forFeature([Concert_date]),
+    TypeOrmModule.forFeature([User]),
   ],
   controllers: [ReservationsController],
-  providers: [ReservationsService, ConcertsService],
+  providers: [ReservationsService, ConcertsService, UsersService],
 })
 export class ReservationsModule {}

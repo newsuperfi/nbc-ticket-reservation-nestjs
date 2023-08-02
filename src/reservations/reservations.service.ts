@@ -6,12 +6,14 @@ import { Reservation } from 'src/domain/reservations.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { ConcertsService } from 'src/concerts/concerts.service';
+import { User } from 'src/domain/users.entity';
 
 @Injectable()
 export class ReservationsService {
   constructor(
     @InjectRepository(Reservation)
     private reservationRepository: Repository<Reservation>,
+    private usersService: UsersService,
     private concertsService: ConcertsService,
   ) {}
 
@@ -21,7 +23,7 @@ export class ReservationsService {
   ) {
     const { concertId, concertDateId, quantity } = createReservationDto;
     const concert = await this.concertsService.concertDetail(concertId);
-    return await this.reservationRepository.save({
+    const result = await this.reservationRepository.save({
       ticket_price: concert[0].price,
       quantity,
       total_price: concert[0].price * quantity,
@@ -29,10 +31,18 @@ export class ReservationsService {
       concert: { id: concertId },
       concert_date: { id: concertDateId },
     });
+    const user = await this.usersService.findById(userId);
+    user.point = user.point - concert[0].price * quantity;
+    await this.usersService.updateUser(user);
+    return result;
   }
 
-  findAll() {
-    return `This action returns all reservations`;
+  async reservationList(userId: number) {
+    const results = await this.reservationRepository.find({
+      where: { user: { id: userId } },
+      relations: { concert: true },
+    });
+    return results;
   }
 
   findOne(id: number) {

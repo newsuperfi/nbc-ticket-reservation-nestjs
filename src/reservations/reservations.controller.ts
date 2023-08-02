@@ -30,8 +30,7 @@ export class ReservationsController {
     @Req() req: IRequest,
     @Res() res: Response,
   ) {
-    const user = req.user;
-    const userId = user.id;
+    const userId = req.user.id;
     const result = await this.reservationsService.reservationConcert(
       createReservationDto,
       userId,
@@ -39,9 +38,12 @@ export class ReservationsController {
     return res.json({ message: '예매에 성공했습니다', result });
   }
 
-  @Get()
-  findAll() {
-    return this.reservationsService.findAll();
+  @Get('list')
+  @UseGuards(AuthGuard)
+  async reservationList(@Req() req: IRequest, @Res() res: Response) {
+    const userId = req.user.id;
+    const results = await this.reservationsService.reservationList(userId);
+    return res.json(results);
   }
 
   @Get(':id')

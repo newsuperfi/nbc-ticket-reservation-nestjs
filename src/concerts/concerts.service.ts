@@ -39,7 +39,7 @@ export class ConcertsService {
   async concertDetail(concertId: number) {
     return await this.concertRepository.find({
       where: { id: concertId },
-      relations: { concert_dates: true },
+      relations: { concert_dates: true }, // 컬럼 제한하려면 쿼리빌더 써야 할 듯.
     });
   }
 

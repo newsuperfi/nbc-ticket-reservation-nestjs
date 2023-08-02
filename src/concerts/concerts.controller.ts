@@ -8,17 +8,20 @@ import {
   Delete,
   Res,
   Query,
+  UseGuards,
 } from '@nestjs/common';
 import { Response } from 'express';
 import { ConcertsService } from './concerts.service';
 import { CreateConcertDto } from './dto/create-concert.dto';
 import { UpdateConcertDto } from './dto/update-concert.dto';
+import { AuthGuard } from 'src/auth/security/auth.guard';
 
 @Controller('concerts')
 export class ConcertsController {
   constructor(private readonly concertsService: ConcertsService) {}
 
   @Post('registration')
+  @UseGuards(AuthGuard)
   async registration(@Body() createConcertDto: CreateConcertDto) {
     return this.concertsService.registration(createConcertDto);
   }
@@ -29,6 +32,7 @@ export class ConcertsController {
   }
 
   @Post('registration/dates/:concertId')
+  @UseGuards(AuthGuard)
   async datesRegistration(
     @Body() dates: Date[],
     @Param('concertId') concertId: number,
