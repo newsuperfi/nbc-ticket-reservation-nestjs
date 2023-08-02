@@ -23,11 +23,13 @@ import { IRequest } from 'src/commons/interfaces/context';
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
+  // 회원가입
   @Post('signup')
   async signUp(@Body() createUserDto: CreateUserDto): Promise<any> {
     return this.usersService.signUp(createUserDto);
   }
 
+  // 프로필 조회
   @Get('profile')
   @UseGuards(AuthGuard)
   async profile(@Req() req: IRequest, @Res() res: Response) {
@@ -43,10 +45,10 @@ export class UsersController {
     return res.json(profile);
   }
 
-  @Get()
-  findAll() {
-    return this.usersService.findAll();
-  }
+  // @Get()
+  // findAll() {
+  //   return this.usersService.findAll();
+  // }
 
   // @Get(':id')
   // findOne(@Param('id') id: string) {
@@ -58,8 +60,8 @@ export class UsersController {
   //   return this.usersService.updateUser(data);
   // }
 
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.usersService.remove(+id);
-  }
+  // @Delete(':id')
+  // remove(@Param('id') id: string) {
+  //   return this.usersService.remove(+id);
+  // }
 }

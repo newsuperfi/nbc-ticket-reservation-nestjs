@@ -1,5 +1,12 @@
+import { IsNotEmpty } from 'class-validator';
+
 export class CreateReservationDto {
+  @IsNotEmpty()
   concertId: number;
+
+  @IsNotEmpty()
   concertDateId: number;
-  quantity: number;
+
+  @IsNotEmpty()
+  seatId: number[];
 }

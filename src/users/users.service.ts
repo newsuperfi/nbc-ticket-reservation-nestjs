@@ -1,4 +1,8 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import {
+  Injectable,
+  UnauthorizedException,
+  BadRequestException,
+} from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -13,30 +17,37 @@ export class UsersService {
     private userRepository: Repository<User>,
   ) {}
 
+  // 인증 미들웨어용 조회 메서드, 현재 미사용
   async authFind(email: string): Promise<User> {
     return await this.userRepository.findOne({
       where: { email },
     });
   }
 
+  // 이메일 체크
   async findByEmail(email: string): Promise<User> {
     return await this.userRepository.findOne({
       where: { email },
     });
   }
 
+  // Id로 회원 조회
   async findById(id: number): Promise<User> {
     return await this.userRepository.findOne({ where: { id } });
   }
 
+  // 비밀번호 암호화
   async transformPassword(password: string): Promise<string> {
     const hashedPassword = await bcrypt.hash(password, 10);
     return hashedPassword;
   }
 
+  // 회원가입
   async signUp(createUserDto: CreateUserDto): Promise<any> {
     const { email, password, confirmPassword, nickname, introduction } =
       createUserDto;
+    if (!email || !password || !confirmPassword || !nickname)
+      throw new BadRequestException('필수 입력사항을 모두 입력해주세요');
     const exUser = await this.findByEmail(email);
     if (exUser)
       throw new UnauthorizedException({
@@ -58,20 +69,21 @@ export class UsersService {
     return { message: '회원가입에 성공하였습니다' };
   }
 
-  findAll() {
-    return `This action returns all users`;
-  }
-
-  findOne(id: number) {
-    return `This action returns a #${id} user`;
-  }
-
-  async updateUser(data) {
-    await this.userRepository.save(data);
+  // 예매 시 포인트 변동
+  async updatePoint(user) {
+    await this.userRepository.save(user);
     return;
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} user`;
-  }
+  // findAll() {
+  //   return `This action returns all users`;
+  // }
+
+  // findOne(id: number) {
+  //   return `This action returns a #${id} user`;
+  // }
+
+  // remove(id: number) {
+  //   return `This action removes a #${id} user`;
+  // }
 }

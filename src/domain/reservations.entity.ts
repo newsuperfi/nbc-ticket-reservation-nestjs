@@ -1,7 +1,14 @@
-import { Entity, PrimaryGeneratedColumn, Column, ManyToOne } from 'typeorm';
+import {
+  Entity,
+  PrimaryGeneratedColumn,
+  Column,
+  ManyToOne,
+  OneToMany,
+} from 'typeorm';
 import { User } from './users.entity';
 import { Concert } from './concets.entity';
 import { Concert_date } from './concert_dates.entity';
+import { Concert_Seat } from './seats.entity';
 
 @Entity({ name: 'reservations' })
 export class Reservation {
@@ -10,9 +17,6 @@ export class Reservation {
 
   @Column({ nullable: false })
   ticket_price: number;
-
-  @Column({ nullable: false })
-  quantity: number;
 
   @Column({ nullable: false })
   total_price: number;
@@ -25,4 +29,7 @@ export class Reservation {
 
   @ManyToOne(() => Concert_date, (concert_date) => concert_date.reservations)
   concert_date: Concert_date;
+
+  @OneToMany(() => Concert_Seat, (concert_seats) => concert_seats.reservation)
+  concert_seats: Concert_Seat;
 }
