@@ -17,6 +17,7 @@ import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { AuthGuard } from 'src/auth/security/auth.guard';
 import { User } from 'src/domain/users.entity';
+import { IRequest } from 'src/commons/interfaces/context';
 
 @Controller('users')
 export class UsersController {
@@ -61,8 +62,4 @@ export class UsersController {
   remove(@Param('id') id: string) {
     return this.usersService.remove(+id);
   }
-}
-
-interface IRequest extends Request {
-  user: { id: number };
 }

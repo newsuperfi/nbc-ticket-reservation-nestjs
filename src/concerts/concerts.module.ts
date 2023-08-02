@@ -12,5 +12,6 @@ import { Concert_date } from 'src/domain/concert_dates.entity';
   ],
   controllers: [ConcertsController],
   providers: [ConcertsService],
+  exports: [ConcertsService],
 })
 export class ConcertsModule {}

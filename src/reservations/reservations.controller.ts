@@ -1,15 +1,42 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Delete,
+  Query,
+  Req,
+  Res,
+  UseGuards,
+} from '@nestjs/common';
+import { Response } from 'express';
 import { ReservationsService } from './reservations.service';
 import { CreateReservationDto } from './dto/create-reservation.dto';
 import { UpdateReservationDto } from './dto/update-reservation.dto';
+import { AuthGuard } from 'src/auth/security/auth.guard';
+import { User } from 'src/domain/users.entity';
+import { IRequest } from 'src/commons/interfaces/context';
 
 @Controller('reservations')
 export class ReservationsController {
   constructor(private readonly reservationsService: ReservationsService) {}
 
   @Post()
-  create(@Body() createReservationDto: CreateReservationDto) {
-    return this.reservationsService.create(createReservationDto);
+  @UseGuards(AuthGuard)
+  async reservationConcert(
+    @Body() createReservationDto: CreateReservationDto,
+    @Req() req: IRequest,
+    @Res() res: Response,
+  ) {
+    const user = req.user;
+    const userId = user.id;
+    const result = await this.reservationsService.reservationConcert(
+      createReservationDto,
+      userId,
+    );
+    return res.json({ message: '예매에 성공했습니다', result });
   }
 
   @Get()
@@ -23,7 +50,10 @@ export class ReservationsController {
   }
 
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updateReservationDto: UpdateReservationDto) {
+  update(
+    @Param('id') id: string,
+    @Body() updateReservationDto: UpdateReservationDto,
+  ) {
     return this.reservationsService.update(+id, updateReservationDto);
   }
 
