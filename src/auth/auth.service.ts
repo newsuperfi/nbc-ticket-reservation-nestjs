@@ -19,7 +19,7 @@ export class AuthService {
 
   async login(
     loginUserDto: LoginUserDto,
-  ): Promise<{ accessToken: string; message: string } | undefined> {
+  ): Promise<{ message: string; accessToken: string } | undefined> {
     const { email, password } = loginUserDto;
     const user: User = await this.userService.findByEmail(email);
     if (!user)
@@ -28,15 +28,19 @@ export class AuthService {
     if (!validatePassword)
       throw new UnauthorizedException({ message: ' 비밀번호를 확인해주세요' });
 
-    const payload: Payload = { id: user.id, email: user.email };
+    const payload: Payload = { id: user.id };
     return {
-      accessToken: this.jwtService.sign(payload),
       message: '로그인에 성공했습니다.',
+      accessToken: this.jwtService.sign(payload),
     };
   }
 
-  async tokenValidateUser(payload: Payload): Promise<User | undefined> {
-    return await this.userService.findByEmail(payload.email);
+  async tokenValidateUser(
+    payload: Payload,
+  ): Promise<{ id: number } | undefined> {
+    const user = await this.userService.findById(payload.id);
+    const result = { id: user.id };
+    return result;
   }
 
   create(createAuthDto: CreateAuthDto) {

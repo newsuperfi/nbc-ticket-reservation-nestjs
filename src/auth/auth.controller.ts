@@ -27,14 +27,16 @@ export class AuthController {
     @Res() res: Response,
   ): Promise<any> {
     const { accessToken, message } = await this.authService.login(loginUserDto);
-    res.setHeader('Authorization', `Bearer ${accessToken}`);
+    res.cookie('Authorization', `Bearer ${accessToken}`);
     return res.json({ message, accessToken });
   }
 
-  @Get('/authenticate')
+  @Get('authenticate')
   @UseGuards(AuthGuard)
   isAuthenticated(@Req() req: Request): any {
+    console.log('컨트롤러');
     const user: any = req.user;
+    console.log(user);
     return user;
   }
 

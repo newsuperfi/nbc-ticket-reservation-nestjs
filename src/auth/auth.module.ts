@@ -16,7 +16,7 @@ import { UsersModule } from 'src/users/users.module';
       signOptions: { expiresIn: '300s' },
     }),
     TypeOrmModule.forFeature([User]),
-    PassportModule,
+    PassportModule.register({ defaultStrategy: 'jwt' }),
     UsersModule,
   ],
   controllers: [AuthController],

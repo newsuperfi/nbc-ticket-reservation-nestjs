@@ -1,4 +1,15 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Delete,
+  Res,
+  Query,
+} from '@nestjs/common';
+import { Response } from 'express';
 import { ConcertsService } from './concerts.service';
 import { CreateConcertDto } from './dto/create-concert.dto';
 import { UpdateConcertDto } from './dto/update-concert.dto';
@@ -7,28 +18,42 @@ import { UpdateConcertDto } from './dto/update-concert.dto';
 export class ConcertsController {
   constructor(private readonly concertsService: ConcertsService) {}
 
-  @Post()
-  create(@Body() createConcertDto: CreateConcertDto) {
-    return this.concertsService.create(createConcertDto);
+  @Post('registration')
+  async registration(@Body() createConcertDto: CreateConcertDto) {
+    return this.concertsService.registration(createConcertDto);
   }
 
-  @Get()
-  findAll() {
-    return this.concertsService.findAll();
+  @Get('list')
+  list() {
+    return this.concertsService.list();
   }
 
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.concertsService.findOne(+id);
+  @Post('registration/dates/:concertId')
+  async datesRegistration(
+    @Body() dates: Date[],
+    @Param('concertId') concertId: number,
+    @Res() res: Response,
+  ) {
+    const results = await this.concertsService.datesRegistration(
+      concertId,
+      dates,
+    );
+    return res.json({ message: '일정 등록에 성공했습니다.', results });
   }
 
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateConcertDto: UpdateConcertDto) {
-    return this.concertsService.update(+id, updateConcertDto);
+  @Get('detail/:concertId')
+  async concertDetail(
+    @Param('concertId') concertId: number,
+    @Res() res: Response,
+  ) {
+    const result = await this.concertsService.concertDetail(concertId);
+    // if(!result) throw new
+    return res.json({ result });
   }
 
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.concertsService.remove(+id);
+  @Get('search')
+  async searchConcert(@Query() keywordQuery) {
+    const { keyword } = keywordQuery;
+    return await this.concertsService.searchConcert(keyword);
   }
 }

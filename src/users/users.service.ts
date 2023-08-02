@@ -13,8 +13,20 @@ export class UsersService {
     private userRepository: Repository<User>,
   ) {}
 
+  async authFind(email: string): Promise<User> {
+    return await this.userRepository.findOne({
+      where: { email },
+    });
+  }
+
   async findByEmail(email: string): Promise<User> {
-    return await this.userRepository.findOne({ where: { email } });
+    return await this.userRepository.findOne({
+      where: { email },
+    });
+  }
+
+  async findById(id: number): Promise<User> {
+    return await this.userRepository.findOne({ where: { id } });
   }
 
   async transformPassword(password: string): Promise<string> {
