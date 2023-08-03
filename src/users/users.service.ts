@@ -49,13 +49,10 @@ export class UsersService {
     if (!email || !password || !confirmPassword || !nickname)
       throw new BadRequestException('필수 입력사항을 모두 입력해주세요');
     const exUser = await this.findByEmail(email);
-    if (exUser)
-      throw new UnauthorizedException({
-        message: '이미 존재하는 이메일입니다.',
-      });
+    if (exUser) throw new UnauthorizedException('이미 존재하는 이메일입니다.');
 
     if (password !== confirmPassword)
-      throw new UnauthorizedException({ message: '비밀번호를 확인해주세요.' });
+      throw new UnauthorizedException('비밀번호를 확인해주세요.');
 
     const hashedPassword = await this.transformPassword(password);
 

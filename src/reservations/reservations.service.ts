@@ -1,10 +1,15 @@
-import { Injectable, BadRequestException } from '@nestjs/common';
+import {
+  Injectable,
+  BadRequestException,
+  HttpException,
+  HttpStatus,
+} from '@nestjs/common';
 import { CreateReservationDto } from './dto/create-reservation.dto';
 import { UpdateReservationDto } from './dto/update-reservation.dto';
 import { UsersService } from 'src/users/users.service';
 import { Reservation } from 'src/domain/reservations.entity';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { DataSource, Repository } from 'typeorm';
 import { ConcertsService } from 'src/concerts/concerts.service';
 import { User } from 'src/domain/users.entity';
 import { Concert_Seat } from 'src/domain/seats.entity';
@@ -20,6 +25,8 @@ export class ReservationsService {
 
     private usersService: UsersService,
     private concertsService: ConcertsService,
+
+    private dataSourse: DataSource,
   ) {}
 
   // 공연 예매
@@ -27,30 +34,44 @@ export class ReservationsService {
     createReservationDto: CreateReservationDto,
     userId: number,
   ) {
-    const { concertId, concertDateId, seatId } = createReservationDto;
-    const concert = await this.concertsService.concertDetail(concertId);
-    const quantity = seatId.length;
-    const result = await this.reservationRepository.save({
-      ticket_price: concert[0].price,
-      total_price: concert[0].price * quantity,
-      user: { id: userId },
-      concert: { id: concertId },
-      concert_date: { id: concertDateId },
-    });
-    for (let i = 0; i < quantity; i++) {
-      let seat = await this.seatRepository.findOneBy({ id: seatId[i] });
-      if (seat.state === 'booked')
-        throw new BadRequestException('이미 예약된 좌석입니다.');
-      await this.seatRepository.save({
-        id: seatId[i],
-        reservation: { id: result.id },
-        state: 'booked',
+    const queryRunner = this.dataSourse.createQueryRunner();
+    await queryRunner.connect();
+    await queryRunner.startTransaction();
+    try {
+      const { concertId, concertDateId, seatId } = createReservationDto;
+      const concert = await this.concertsService.concertDetail(concertId);
+      const quantity = seatId.length;
+      const result = await queryRunner.manager.getRepository(Reservation).save({
+        ticket_price: concert[0].price,
+        total_price: concert[0].price * quantity,
+        user: { id: userId },
+        concert: { id: concertId },
+        concert_date: { id: concertDateId },
       });
+      for (let i = 0; i < quantity; i++) {
+        let seat = await this.seatRepository.findOneBy({ id: seatId[i] });
+        console.log(seat);
+        if (seat.state === 'booked')
+          throw new BadRequestException('이미 예약된 좌석입니다.');
+
+        await queryRunner.manager.getRepository(Concert_Seat).save({
+          id: seatId[i],
+          reservation: { id: result.id },
+          state: 'booked',
+        });
+      }
+      const user = await this.usersService.findById(userId);
+      user.point = user.point - concert[0].price * quantity;
+      await this.usersService.updatePoint(user);
+
+      await queryRunner.commitTransaction();
+      return { message: '예매에 성공했습니다', result };
+    } catch (err) {
+      await queryRunner.rollbackTransaction();
+      throw err;
+    } finally {
+      await queryRunner.release();
     }
-    const user = await this.usersService.findById(userId);
-    user.point = user.point - concert[0].price * quantity;
-    await this.usersService.updatePoint(user);
-    return result;
   }
 
   // async reservationList(userId: number) {

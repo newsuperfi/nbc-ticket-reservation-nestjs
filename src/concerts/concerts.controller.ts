@@ -76,7 +76,10 @@ export class ConcertsController {
     return await this.concertsService.searchConcert(keyword);
   }
 
-  @Post('seatsetting') // 좌석 생성
+  // 좌석 생성
+  // 공연별로 공연장 규모, 좌석 수 등이 다를 수 있기 때문에 관리자가 직접 입력
+  // 해당 row와 좌석수를 입력하면 해당 row에 해당하는 좌석이 반복문 실행되며 생성됨
+  @Post('seatsetting')
   @UseGuards(AuthGuard)
   async createSeats(
     @Body() seats: CreateSeatsDto,

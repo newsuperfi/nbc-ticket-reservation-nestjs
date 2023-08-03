@@ -30,12 +30,17 @@ export class ReservationsController {
     @Req() req: IRequest,
     @Res() res: Response,
   ) {
+    // try {
     const userId = req.user.id;
-    const results = await this.reservationsService.concertReservation(
-      createReservationDto,
-      userId,
-    );
-    return res.json({ message: '예매에 성공했습니다', results });
+    const { message, result } =
+      await this.reservationsService.concertReservation(
+        createReservationDto,
+        userId,
+      );
+    return res.json({ message, result });
+    // } catch (err) {
+    //   return res.status(err.status).json(err.message);
+    // }
   }
 
   @Get('list') // 예매 내역 조회
