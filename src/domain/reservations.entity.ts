@@ -27,9 +27,13 @@ export class Reservation {
   @ManyToOne(() => Concert, (concert) => concert.reservations)
   concert: Concert;
 
-  @ManyToOne(() => Concert_date, (concert_date) => concert_date.reservations)
+  @ManyToOne(() => Concert_date, (concert_date) => concert_date.reservations, {
+    eager: true,
+  })
   concert_date: Concert_date;
 
-  @OneToMany(() => Concert_Seat, (concert_seats) => concert_seats.reservation)
+  @OneToMany(() => Concert_Seat, (concert_seats) => concert_seats.reservation, {
+    eager: true,
+  })
   concert_seats: Concert_Seat;
 }

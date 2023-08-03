@@ -1,6 +1,7 @@
 import {
   Injectable,
   BadRequestException,
+  ForbiddenException,
   HttpException,
   HttpStatus,
 } from '@nestjs/common';
@@ -13,6 +14,7 @@ import { DataSource, Repository } from 'typeorm';
 import { ConcertsService } from 'src/concerts/concerts.service';
 import { User } from 'src/domain/users.entity';
 import { Concert_Seat } from 'src/domain/seats.entity';
+import { Concert } from 'src/domain/concets.entity';
 
 @Injectable()
 export class ReservationsService {
@@ -101,6 +103,36 @@ export class ReservationsService {
     return results;
   }
 
+  async cancelReservation(reservationId) {
+    const queryRunner = this.dataSourse.createQueryRunner();
+    await queryRunner.connect();
+    await queryRunner.startTransaction();
+    try {
+      const reservation = await queryRunner.manager
+        .getRepository(Reservation)
+        .findOneBy({ id: reservationId });
+      // console.log(reservation);
+      const seats: any = reservation.concert_seats;
+      console.log('seats', seats);
+      for (let i = 0; i < seats.length; i++) {
+        const seat = await queryRunner.manager
+          .getRepository(Concert_Seat)
+          .findOneBy({ id: seats[i].id });
+        if (seat.state === 'unbooked')
+          throw new ForbiddenException('예약되지 않은 좌석입니다.');
+        seat.state = 'unbooked';
+        // seat.reservationId = '';
+        queryRunner.manager.getRepository(Concert_Seat).save(seat);
+      }
+      await queryRunner.commitTransaction();
+      return;
+    } catch (err) {
+      await queryRunner.rollbackTransaction();
+      throw err;
+    } finally {
+      await queryRunner.release();
+    }
+  }
   // findOne(id: number) {
   //   return `This action returns a #${id} reservation`;
   // }

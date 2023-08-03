@@ -3,6 +3,7 @@ import { PassportStrategy } from '@nestjs/passport';
 import { AuthService } from 'src/auth/auth.service';
 import { Payload } from './payload.interface';
 import { ExtractJwt, Strategy, VerifiedCallback } from 'passport-jwt';
+import { ConfigService } from '@nestjs/config';
 
 // Header대신 cookie에 토큰 심었을때는 이 함수를 활용. jwrFromRequest뒤에 이어주기.
 // let cookieExtractor = function( req )
@@ -17,7 +18,10 @@ import { ExtractJwt, Strategy, VerifiedCallback } from 'passport-jwt';
 
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy) {
-  constructor(private authService: AuthService) {
+  constructor(
+    private authService: AuthService,
+    private readonly configService: ConfigService,
+  ) {
     super({
       // 헤더에서 BearerToken을 추출
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),

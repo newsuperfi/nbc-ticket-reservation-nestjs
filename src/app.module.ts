@@ -8,6 +8,7 @@ import { ormConfig } from './orm.config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { AuthModule } from './auth/auth.module';
 import { AuthMiddleware } from './middlewares/auth.middleware';
+import { ConfigModule, ConfigService } from '@nestjs/config';
 
 @Module({
   imports: [
@@ -16,9 +17,10 @@ import { AuthMiddleware } from './middlewares/auth.middleware';
     ReservationsModule,
     TypeOrmModule.forRootAsync({ useFactory: ormConfig }),
     AuthModule,
+    ConfigModule.forRoot({ isGlobal: true }),
   ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [AppService, ConfigService],
 })
 export class AppModule {
   // configure(consumer: MiddlewareConsumer) {

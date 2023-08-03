@@ -51,6 +51,15 @@ export class ReservationsController {
     return res.json(result);
   }
 
+  @Post('cancel')
+  @UseGuards(AuthGuard)
+  async cancelReservation(@Body() body, @Res() res: Response) {
+    const { reservationId } = body;
+    console.log('컨트롤러', reservationId);
+    await this.reservationsService.cancelReservation(reservationId);
+    return res.json({ message: '예약이 취소되었습니다' });
+  }
+
   // @Get(':id')
   // findOne(@Param('id') id: string) {
   //   return this.reservationsService.findOne(+id);
