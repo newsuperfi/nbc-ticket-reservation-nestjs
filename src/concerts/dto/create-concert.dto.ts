@@ -7,7 +7,6 @@ export class CreateConcertDto {
   @IsNotEmpty()
   artist: string;
 
-  @IsNotEmpty()
   date: string;
 
   @IsNotEmpty()

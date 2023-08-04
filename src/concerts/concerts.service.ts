@@ -59,16 +59,20 @@ export class ConcertsService {
   async concertDetail(concertId: number) {
     return await this.concertRepository
       .createQueryBuilder('concerts')
-      .select([
-        'concerts.title',
-        'concerts.artist',
-        'concerts.location',
-        'concert_dates.date',
-        'concerts.introduction',
-        'concerts.price',
-      ])
+      // .select([
+      //   'concerts.title',
+      //   'concerts.artist',
+      //   'concerts.location',
+      //   'concert_dates.date',
+      //   'concerts.introduction',
+      //   'concerts.price',
+      //   'concert_seats.seat_number',
+      //   'concert_seats.state',
+      // ])
+      .leftJoinAndSelect('concerts.concert_dates', 'concert_dates')
+      .leftJoinAndSelect('concert_dates.concert_seats', 'concert_seats')
       .where('concerts.id = :concertId', { concertId })
-      .leftJoin('concerts.concert_dates', 'concert_dates')
+      // .andWhere('concert_seats.state = :state', { state: 'unbooked' })
       .getMany();
   }
 
