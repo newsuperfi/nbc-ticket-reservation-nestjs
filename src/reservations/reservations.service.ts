@@ -62,6 +62,8 @@ export class ReservationsService {
         });
       }
       const user = await this.usersService.findById(userId);
+      if (user.point < concert[0].price * quantity)
+        throw new ForbiddenException('잔여 포인트가 모자릅니다');
       user.point = user.point - concert[0].price * quantity;
       // await this.usersService.updatePoint(user);
       await queryRunner.manager.getRepository(User).save(user);
