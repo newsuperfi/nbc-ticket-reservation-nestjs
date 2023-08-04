@@ -106,7 +106,7 @@ export class ReservationsService {
     return results;
   }
 
-  async cancelReservation(reservationId) {
+  async cancelReservation(reservationId, userId) {
     const queryRunner = this.dataSourse.createQueryRunner();
     await queryRunner.connect();
     await queryRunner.startTransaction();
@@ -135,6 +135,11 @@ export class ReservationsService {
         //   .update({ id: seat.id }, { state: 'unbooked', reservation: null });
         // console.log(result);
       }
+      const user = await queryRunner.manager
+        .getRepository(User)
+        .findOneBy({ id: userId });
+      user.point = user.point + reservation.total_price;
+      await queryRunner.manager.getRepository(User).save(user);
       const result = await queryRunner.manager
         .getRepository(Reservation)
         .delete({ id: reservationId });

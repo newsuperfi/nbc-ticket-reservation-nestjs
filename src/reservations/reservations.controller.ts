@@ -53,9 +53,14 @@ export class ReservationsController {
 
   @Post('cancel')
   @UseGuards(AuthGuard)
-  async cancelReservation(@Body() body, @Res() res: Response) {
+  async cancelReservation(
+    @Body() body,
+    @Req() req: IRequest,
+    @Res() res: Response,
+  ) {
     const { reservationId } = body;
-    await this.reservationsService.cancelReservation(reservationId);
+    const userId = req.user.id;
+    await this.reservationsService.cancelReservation(reservationId, userId);
     return res.json({ message: '예약이 취소되었습니다' });
   }
 
