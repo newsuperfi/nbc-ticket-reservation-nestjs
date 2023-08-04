@@ -65,23 +65,4 @@ export class UsersService {
 
     return { message: '회원가입에 성공하였습니다' };
   }
-
-  // 예매 시 포인트 변동 - 트랜잭션 시 작동되지 않는 문제로 주석처리
-  // async updatePoint(user) {
-  //   console.log('업데이트포인트ㅡㅡ', user);
-  //   await this.userRepository.save(user);
-  //   return;
-  // }
-
-  // findAll() {
-  //   return `This action returns all users`;
-  // }
-
-  // findOne(id: number) {
-  //   return `This action returns a #${id} user`;
-  // }
-
-  // remove(id: number) {
-  //   return `This action removes a #${id} user`;
-  // }
 }

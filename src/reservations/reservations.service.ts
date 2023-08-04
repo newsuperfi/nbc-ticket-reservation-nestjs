@@ -36,7 +36,6 @@ export class ReservationsService {
     createReservationDto: CreateReservationDto,
     userId: number,
   ) {
-    console.log('예매시ㅣㅣㅣㅣㅣㅣㅣ작');
     const queryRunner = this.dataSourse.createQueryRunner();
     await queryRunner.connect();
     await queryRunner.startTransaction();
@@ -64,8 +63,6 @@ export class ReservationsService {
       }
       const user = await this.usersService.findById(userId);
       user.point = user.point - concert[0].price * quantity;
-      console.log('유저ㅓㅓㅓㅓㅓㅓㅓㅓㅓ,', user);
-      console.log('유저포인트ㅡㅡㅡㅡㅡㅡㅡㅡ', user.point);
       // await this.usersService.updatePoint(user);
       await queryRunner.manager.getRepository(User).save(user);
 
@@ -114,20 +111,25 @@ export class ReservationsService {
       const reservation = await queryRunner.manager
         .getRepository(Reservation)
         .findOneBy({ id: reservationId });
-      console.log(reservation);
       if (!reservation)
         throw new ForbiddenException('존재하지 않는 예약입니다.');
       const seats: any = reservation.concert_seats;
+      const concertDate: number = reservation.concert_date.date.getTime();
+      const dateNow: number = new Date().getTime();
+      const leftTime = (concertDate - dateNow) / (1000 * 60 * 60);
+      if (leftTime < 3)
+        throw new ForbiddenException(
+          '공연 시작 3시간 전까지만 취소가 가능합니다.',
+        );
+
       for (let i = 0; i < seats.length; i++) {
-        console.log('2222222222');
         const seat = await queryRunner.manager
           .getRepository(Concert_Seat)
           .findOneBy({ id: seats[i].id });
-        console.log('좌석', seat);
         if (seat.state === 'unbooked')
           throw new ForbiddenException('예약되지 않은 좌석입니다.');
         seat.state = 'unbooked';
-        // reservationId를 지워야하는데.. foreignKey라 그런지 없는 타입이라 나온다..
+        //   // reservationId를 지워야하는데.. foreignKey라 그런지 없는 타입이라 나온다..
         await queryRunner.manager.getRepository(Concert_Seat).save(seat);
         // ------
         // const result = await queryRunner.manager
@@ -143,7 +145,6 @@ export class ReservationsService {
       const result = await queryRunner.manager
         .getRepository(Reservation)
         .delete({ id: reservationId });
-      console.log('삭제결과', result);
       await queryRunner.commitTransaction();
       return;
     } catch (err) {
@@ -153,15 +154,4 @@ export class ReservationsService {
       await queryRunner.release();
     }
   }
-  // findOne(id: number) {
-  //   return `This action returns a #${id} reservation`;
-  // }
-
-  // update(id: number, updateReservationDto: UpdateReservationDto) {
-  //   return `This action updates a #${id} reservation`;
-  // }
-
-  // remove(id: number) {
-  //   return `This action removes a #${id} reservation`;
-  // }
 }
