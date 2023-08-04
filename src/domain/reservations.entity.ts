@@ -32,6 +32,9 @@ export class Reservation {
   })
   concert_date: Concert_date;
 
-  @OneToMany(() => Concert_Seat, (concert_seats) => concert_seats.reservation)
+  @OneToMany(() => Concert_Seat, (concert_seats) => concert_seats.reservation, {
+    eager: true,
+    // onDelete: 'SET NULL',
+  })
   concert_seats: Concert_Seat;
 }

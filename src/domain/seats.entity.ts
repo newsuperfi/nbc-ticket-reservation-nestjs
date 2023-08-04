@@ -29,7 +29,7 @@ export class Concert_Seat {
   concert_date: Concert_date;
 
   @ManyToOne(() => Reservation, (reservation) => reservation.concert_seats, {
-    eager: true,
+    onDelete: 'SET NULL',
   })
   reservation: Reservation;
   // @RelationId((concert_seats: Concert_Seat) => concert_seats.reservation)

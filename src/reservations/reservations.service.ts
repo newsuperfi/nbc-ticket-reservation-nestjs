@@ -36,6 +36,7 @@ export class ReservationsService {
     createReservationDto: CreateReservationDto,
     userId: number,
   ) {
+    console.log('예매시ㅣㅣㅣㅣㅣㅣㅣ작');
     const queryRunner = this.dataSourse.createQueryRunner();
     await queryRunner.connect();
     await queryRunner.startTransaction();
@@ -63,7 +64,10 @@ export class ReservationsService {
       }
       const user = await this.usersService.findById(userId);
       user.point = user.point - concert[0].price * quantity;
-      await this.usersService.updatePoint(user);
+      console.log('유저ㅓㅓㅓㅓㅓㅓㅓㅓㅓ,', user);
+      console.log('유저포인트ㅡㅡㅡㅡㅡㅡㅡㅡ', user.point);
+      // await this.usersService.updatePoint(user);
+      await queryRunner.manager.getRepository(User).save(user);
 
       await queryRunner.commitTransaction();
       return { message: '예매에 성공했습니다', result };
@@ -111,6 +115,8 @@ export class ReservationsService {
         .getRepository(Reservation)
         .findOneBy({ id: reservationId });
       console.log(reservation);
+      if (!reservation)
+        throw new ForbiddenException('존재하지 않는 예약입니다.');
       const seats: any = reservation.concert_seats;
       for (let i = 0; i < seats.length; i++) {
         console.log('2222222222');
@@ -121,14 +127,18 @@ export class ReservationsService {
         if (seat.state === 'unbooked')
           throw new ForbiddenException('예약되지 않은 좌석입니다.');
         seat.state = 'unbooked';
-        seat.reservation = null;
-        // await seat.save();
-        //reservationId를 지워야하는데.. foreignKey라 그런지 없는 타입이라 나온다..
+        // reservationId를 지워야하는데.. foreignKey라 그런지 없는 타입이라 나온다..
+        await queryRunner.manager.getRepository(Concert_Seat).save(seat);
+        // ------
         // const result = await queryRunner.manager
         //   .getRepository(Concert_Seat)
         //   .update({ id: seat.id }, { state: 'unbooked', reservation: null });
         // console.log(result);
       }
+      const result = await queryRunner.manager
+        .getRepository(Reservation)
+        .delete({ id: reservationId });
+      console.log('삭제결과', result);
       await queryRunner.commitTransaction();
       return;
     } catch (err) {
