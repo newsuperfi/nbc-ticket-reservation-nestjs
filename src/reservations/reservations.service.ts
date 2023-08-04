@@ -52,7 +52,6 @@ export class ReservationsService {
       });
       for (let i = 0; i < quantity; i++) {
         let seat = await this.seatRepository.findOneBy({ id: seatId[i] });
-        console.log(seat);
         if (seat.state === 'booked')
           throw new BadRequestException('이미 예약된 좌석입니다.');
 
@@ -111,18 +110,24 @@ export class ReservationsService {
       const reservation = await queryRunner.manager
         .getRepository(Reservation)
         .findOneBy({ id: reservationId });
-      // console.log(reservation);
+      console.log(reservation);
       const seats: any = reservation.concert_seats;
-      console.log('seats', seats);
       for (let i = 0; i < seats.length; i++) {
+        console.log('2222222222');
         const seat = await queryRunner.manager
           .getRepository(Concert_Seat)
           .findOneBy({ id: seats[i].id });
+        console.log('좌석', seat);
         if (seat.state === 'unbooked')
           throw new ForbiddenException('예약되지 않은 좌석입니다.');
         seat.state = 'unbooked';
-        // seat.reservationId = '';
-        queryRunner.manager.getRepository(Concert_Seat).save(seat);
+        seat.reservation = null;
+        // await seat.save();
+        //reservationId를 지워야하는데.. foreignKey라 그런지 없는 타입이라 나온다..
+        // const result = await queryRunner.manager
+        //   .getRepository(Concert_Seat)
+        //   .update({ id: seat.id }, { state: 'unbooked', reservation: null });
+        // console.log(result);
       }
       await queryRunner.commitTransaction();
       return;
